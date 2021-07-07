@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mysql:
+    container_name: cont-db
+    image: mysql/mysql-server:5.7
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: mydbpass
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    restart: always
+
+  discovery:
+    container_name: cont-discovery
+    image: ani-discovery
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    container_name: cont-gateway
+    image: ani-gateway
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discovery
+    restart: always
+
+  quotation-service:
+    container_name: cont-quotation-service
+    image : ani-quotation-service
+    environment:
+      - JAVA_OPTS=
+        -DEUREKA_SERVER=http://discovery:8761/eureka
+    ports:
+      - "8997:8997"
+    depends_on:
+      - mysql
+      - discovery
+    restart: always
